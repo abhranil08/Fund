@@ -1,0 +1,36 @@
+.footer {
+  margin: 0;
+  background-color: #462f75;
+  text-align: left;
+}
+
+.columnOne {
+  padding: 1rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footerLinks {
+  list-style: none;
+}
+
+.footerLink {
+  color: #ddd;
+}
+
+.footerLink:link {
+  text-decoration: none;
+}
+
+.columnTwo {
+  padding: 1rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.socialLinks {
+  list-style: none;
+  color: #ddd;
+}

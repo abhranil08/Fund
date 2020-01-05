@@ -1,0 +1,44 @@
+.Navbar {
+  padding: .5rem 2rem;
+  text-align: center;
+  /* background-image: linear-gradient(to right, rgba(12, 23, 200, .7), rgba(176, 5, 122, .8)); */
+  /* background: #eee; */
+}
+
+.NavBrand {
+  font-size: 1.5rem;
+  padding: .5rem 1rem;
+  color: black;
+}
+
+.NavBrand:link {
+  text-decoration: none;
+}
+
+.NavLink:link {
+  text-decoration: none;
+}
+
+.NavLink {
+  color: black;
+  padding: .5rem 1.75rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: all .2s ease-out;
+  background-color: rgba(70, 47, 117, .3);
+}
+
+.NavLink:hover {
+  background-color: rgb(70, 47, 117);
+  color: white;
+}
+
+.NavLink:not(:last-child) {
+  margin-right: 1rem;
+}
+
+@media screen and (max-width: 992px) {
+  .NavLink:not(:last-child) {
+    margin-right: 0;
+  }
+}

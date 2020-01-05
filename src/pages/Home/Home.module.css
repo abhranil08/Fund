@@ -1,0 +1,28 @@
+.Homepage {
+  margin: 0;
+  padding: 2rem 0;
+}
+
+.heading {
+  text-align: center;
+}
+
+.landingCard {
+  margin: 1rem 0;
+  width: 22.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all .2s ease-out;
+}
+
+.landingCard:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+}
+
+.partnersFlex {
+  padding: 1rem;
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

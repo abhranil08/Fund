@@ -1,25 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Switch, Route } from 'react-router-dom';
+import classes from './App.module.css';
 
-function App() {
+import Navigation from './components/Navigation/Navigation';
+import Footer from './components/Footer/Footer';
+import Home from './pages/Home/Home';
+import Login from './pages/Login/Login';
+import Signup from './pages/Signup/Signup';
+
+const App = props => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <main className={classes.App}>
+      <Navigation />
+      <Switch>
+        <Route path="/" exact component={Home} />
+        <Route path="/login" render={(props) => <Login {...props} />} />
+        <Route path="/signup" render={(props) => <Signup {...props} />} />
+      </Switch>
+      <Footer />
+    </main>
   );
 }
 
