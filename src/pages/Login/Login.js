@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import firebase from '../../firebase/config';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -9,6 +10,7 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 import classes from './Login.module.css';
 
 const isValid = (email, passwd) => {
@@ -19,17 +21,31 @@ const isValid = (email, passwd) => {
 }
 
 const Login = props => {
+  const { history, storeUser } = props;
   const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
   const [hiddenPassword, setHiddenPassword] = useState(true);
+  const [formError, setFormError] = useState(false);
 
   const formSubmit = () => {
     if (isValid(inputEmail, inputPassword)) {
-      console.log('valid email and password!');
+      setFormError(false);
+      handleSignIn(inputEmail, inputPassword);
     } else {
       console.log('Invalid username or password!');
+      setFormError(true);
     }
   }
+
+  const handleSignIn = useCallback(async (email, password) => {
+    try {
+      const user = await firebase.auth().signInWithEmailAndPassword(email, password);
+      storeUser(user);
+      history.push('/');
+    } catch (err) {
+      console.log(err);
+    }
+  }, [history, storeUser]);
 
   return (
     <section className={classes.login}>
@@ -38,6 +54,7 @@ const Login = props => {
           <Col md={7} className="my-2 p-2 d-flex justify-content-center align-items-center">
             <Card className={classes.loginCard} body>
               <Form>
+                {formError && <Alert variant="danger">Invalid email or password!</Alert>}
                 <Form.Group controlId="formBasicEmail">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
@@ -84,4 +101,4 @@ const Login = props => {
   );
 };
 
-export default Login;
+export default withRouter(Login);
