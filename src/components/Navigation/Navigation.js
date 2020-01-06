@@ -6,7 +6,7 @@ import Nav from 'react-bootstrap/Nav';
 import classes from './Navigation.module.css';
 
 const Navigation = props => {
-  const { isAuthenticated, handleSignOut } = props;
+  const { isAuthenticated, handleSignOut, userName } = props;
 
   return (
     <Navbar className={classes.Navbar} bg="light" variant="light" expand="lg" sticky="top">
@@ -19,7 +19,12 @@ const Navigation = props => {
               <Link className={classes.NavLink} to="/login"><span>Login</span></Link>
               <Link className={classes.NavLink} to="/signup"><span>Sign Up</span></Link>
             </>
-          ) : <span className={classes.NavLink} onClick={handleSignOut}>Sign Out</span>}
+          ) : (
+            <>
+              <span className={classes.NavLink}>Hey {userName}!</span>
+              <span className={classes.NavLink} onClick={handleSignOut}>Sign Out</span>
+            </>
+          )}
         </Nav>
       </Navbar.Collapse>
     </Navbar>
