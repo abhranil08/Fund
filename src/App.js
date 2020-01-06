@@ -12,29 +12,31 @@ import firebase from './firebase/config';
 
 const App = props => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userID, setUserID] = useState(null);
+  // const [userID, setUserID] = useState(null);
+  const [userName, setUserName] = useState('');
 
-  const storeUser = (userID) => {
-    setUserID(userID);
+  const storeUser = (userID, userName) => {
+    // setUserID(userID);
+    setUserName(userName);
     setIsAuthenticated(true);
     alert('Signed in successfully!');
-    console.log(userID);
+    // console.log(userID);
   };
 
   const handleSignOut = useCallback(async () => {
     try {
       await firebase.auth().signOut();
+      alert('Signed out successfully!');
+      setIsAuthenticated(false);
+      setUserName('');
     } catch (err) {
       console.log(err);
     }
-    alert('Signed out successfully!');
-    setIsAuthenticated(false);
-    setUserID(null);
   }, []);
 
   return (
     <main className={classes.App}>
-      <Navigation isAuthenticated={isAuthenticated} userID={userID} handleSignOut={handleSignOut} />
+      <Navigation isAuthenticated={isAuthenticated} userName={userName} handleSignOut={handleSignOut} />
       <Switch>
         <Route path="/" exact component={Home} />
         <Route path="/login" render={(props) => <Login {...props} storeUser={storeUser} />} />
