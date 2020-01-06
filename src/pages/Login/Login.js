@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import firebase from '../../firebase/config';
+import firebase, { database } from '../../firebase/config';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -11,6 +11,7 @@ import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
+import Spinner from 'react-bootstrap/Spinner';
 import classes from './Login.module.css';
 
 const isValid = (email, passwd) => {
@@ -20,27 +21,39 @@ const isValid = (email, passwd) => {
   return validEmail && validPasswd;
 }
 
+const getUsernameFromDatabase = async (userId) => {
+  const userRef = await database.ref('users/' + userId).once('value');
+  const user = userRef.val();
+  return user.username;
+}
+
 const Login = props => {
   const { history, storeUser } = props;
   const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formSubmit = () => {
+    setIsLoading(true);
     if (isValid(inputEmail, inputPassword)) {
       setFormError(false);
       handleSignIn(inputEmail, inputPassword);
     } else {
       console.log('Invalid username or password!');
       setFormError(true);
+      setIsLoading(false);
     }
   }
 
   const handleSignIn = useCallback(async (email, password) => {
     try {
-      const user = await firebase.auth().signInWithEmailAndPassword(email, password);
-      storeUser(user);
+      const userCredentials = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const username = await getUsernameFromDatabase(userCredentials.user.uid);
+      console.log(userCredentials.user.uid, username);
+      storeUser(userCredentials.user.uid, username);
+      setIsLoading(false);
       history.push('/');
     } catch (err) {
       console.log(err);
@@ -73,7 +86,10 @@ const Login = props => {
                   <Form.Check type="checkbox" label="Show Password" onChange={event => setHiddenPassword(!hiddenPassword)} />
                 </Form.Group>
                 <Button className={classes.loginButton} variant="primary" onClick={formSubmit}>
-                  Login
+                  Login&nbsp;&nbsp;
+                  {isLoading && <Spinner animation="grow" role="status">
+                    <span className="sr-only">Loading...</span>
+                  </Spinner>}
                 </Button>
                 <div className="mt-3">
                   <Link to="/signup">Create an account</Link>
