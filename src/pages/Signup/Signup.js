@@ -2,8 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-
-import firebase, { database } from '../../firebase/config';
+import firebase from '../../firebase/config';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -22,46 +21,36 @@ const isValid = (email, passwd) => {
   return validEmail && validPasswd;
 }
 
-const writeUserData = (userId, userName, email) => {
-  database.ref('users/' + userId).set({
-    username: userName,
-    email: email
-  });
-}
-
 const Signup = props => {
-  const { history, storeUser } = props;
-  const [inputUsername, setInputUsername] = useState('');
-  const [inputEmail, setInputEmail] = useState('');
-  const [inputPassword, setInputPassword] = useState('');
+  const { history, storeUserName, writeUserData } = props;
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const formSubmit = () => {
-    setIsLoading(true);
-    if (isValid(inputEmail, inputPassword)) {
-      setFormError(false);
-      handleSignUp(inputEmail, inputPassword, inputUsername);
-    } else {
-      console.log('Invalid username or password!');
-      setFormError(true);
-      setIsLoading(false);
-    }
-  }
-
   const handleSignUp = useCallback(async (email, password, userName) => {
     try {
       const userCredentials = await firebase.auth().createUserWithEmailAndPassword(email, password);
-      // console.log(userCredentials.user.uid);
       writeUserData(userCredentials.user.uid, userName, email);
-      storeUser(userCredentials.user.uid, userName);
+      storeUserName(userName);
       setIsLoading(false);
       history.push('/');
     } catch (err) {
       console.log(err);
     }
-  }, [history, storeUser])
+  }, [history, storeUserName, writeUserData])
+
+  const formSubmit = useCallback((event) => {
+    event.preventDefault();
+    const { username, email, password } = event.target.elements;
+    setIsLoading(true);
+    if (isValid(email.value, password.value)) {
+      setFormError(false);
+      handleSignUp(email.value, password.value, username.value);
+    } else {
+      setFormError(true);
+      setIsLoading(false);
+    }
+  }, [handleSignUp]);
 
   return (
     <section className={classes.signup}>
@@ -69,33 +58,33 @@ const Signup = props => {
         <Row className="py-2">
           <Col md={7} className="my-2 p-2 d-flex justify-content-center align-items-center">
             <Card className={classes.signupCard} body>
-              <Form>
+              <Form onSubmit={formSubmit}>
                 {formError && <Alert variant="danger">Invalid email or password!</Alert>}
                 <Form.Group controlId="formBasicName">
                   <Form.Label>Username</Form.Label>
                   <Form.Control
+                    name="username"
                     type="text"
-                    placeholder="Enter username"
-                    onChange={event => setInputUsername(event.target.value)} />
+                    placeholder="Enter username" />
                 </Form.Group>
                 <Form.Group controlId="formBasicEmail">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
+                    name="email"
                     type="email"
-                    placeholder="Enter email"
-                    onChange={event => setInputEmail(event.target.value)} />
+                    placeholder="Enter email" />
                 </Form.Group>
                 <Form.Group controlId="formBasicPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
+                    name="password"
                     type={hiddenPassword ? "password" : "text"}
-                    placeholder="Password"
-                    onChange={event => setInputPassword(event.target.value)} />
+                    placeholder="Password" />
                 </Form.Group>
                 <Form.Group controlId="formBasicCheckbox">
                   <Form.Check type="checkbox" label="Show Password" onChange={event => setHiddenPassword(!hiddenPassword)} />
                 </Form.Group>
-                <Button className={classes.signupButton} variant="primary" onClick={formSubmit}>
+                <Button className={classes.signupButton} variant="primary" type="submit">
                   Sign Up&nbsp;&nbsp;
                   {isLoading && <Spinner animation="grow" role="status">
                     <span className="sr-only">Loading...</span>
