@@ -13,9 +13,14 @@ import firebase, { database } from './firebase/config';
 import { AuthContext } from './context/authContext';
 
 const getUsernameFromDatabase = async (userId) => {
-  const userRef = await database.ref('users/' + userId).once('value');
-  const user = userRef.val();
-  return user.username;
+  try {
+    const userRef = await database.ref('users/' + userId).once('value');
+    const user = userRef.val();
+    return user.username;
+  } catch (err) {
+    console.log(err);
+    return '';
+  }
 }
 
 const writeUserData = (userId, userName, email) => {
@@ -32,29 +37,31 @@ const App = props => {
 
   useEffect(() => {
     if (currentUser) {
-      // console.log('current user', currentUser);
+      firebase.auth().getRedirectResult()
+        .then(result => {
+          if (result.user && result.additionalUserInfo.isNewUser) {
+            const user = result.user;
+            writeUserData(user.uid, user.displayName, user.email);
+          }
+        })
+        .catch(err => console.log(err));
       getUsernameFromDatabase(currentUser.uid)
         .then(usr => {
           setUserName(usr)
           setIsAuthenticated(true);
-        });
+        })
+        .catch(err => console.log(err));
     } else {
       console.log('no user signed in');
     }
   }, [currentUser]);
 
-  const storeUserName = useCallback((userName) => {
-    setUserName(userName);
-    setIsAuthenticated(true);
-    alert('Signed in successfully!');
-  }, []);
-
   const handleSignOut = useCallback(async () => {
     try {
       await firebase.auth().signOut();
-      alert('Signed out successfully!');
       setIsAuthenticated(false);
       setUserName('');
+      alert('Signed out successfully!');
     } catch (err) {
       console.log(err);
     }
@@ -66,15 +73,11 @@ const App = props => {
       <Switch>
         <Route path="/" exact component={Home} />
         <Route path="/login"
-          render={(props) => <Login {...props}
-                                storeUserName={storeUserName}
-                                getUsernameFromDatabase={getUsernameFromDatabase} />} />
+          render={(props) => !isAuthenticated ? <Login {...props} /> : <Redirect to="/" />} />
         <Route path="/signup"
-          render={(props) => <Signup {...props}
-                                storeUserName={storeUserName}
-                                writeUserData={writeUserData} />} />
+          render={(props) => !isAuthenticated ? <Signup {...props} writeUserData={writeUserData} /> : <Redirect to="/" />} />
         <Route path="/dashboard"
-          render={(props) => isAuthenticated ? <Dashboard {...props} /> : <Redirect to="/login" />} />
+          render={(props) => isAuthenticated ? <Dashboard {...props} user={currentUser} /> : <Redirect to="/login" />} />
       </Switch>
       <Footer />
     </main>
