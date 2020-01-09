@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import firebase, { database } from '../../firebase/config';
+import firebase from '../../firebase/config';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -21,44 +21,37 @@ const isValid = (email, passwd) => {
   return validEmail && validPasswd;
 }
 
-const getUsernameFromDatabase = async (userId) => {
-  const userRef = await database.ref('users/' + userId).once('value');
-  const user = userRef.val();
-  return user.username;
-}
-
 const Login = props => {
-  const { history, storeUser } = props;
-  const [inputEmail, setInputEmail] = useState('');
-  const [inputPassword, setInputPassword] = useState('');
+  const { history, storeUserName, getUsernameFromDatabase } = props;
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const formSubmit = () => {
-    setIsLoading(true);
-    if (isValid(inputEmail, inputPassword)) {
-      setFormError(false);
-      handleSignIn(inputEmail, inputPassword);
-    } else {
-      console.log('Invalid username or password!');
-      setFormError(true);
-      setIsLoading(false);
-    }
-  }
 
   const handleSignIn = useCallback(async (email, password) => {
     try {
       const userCredentials = await firebase.auth().signInWithEmailAndPassword(email, password);
       const username = await getUsernameFromDatabase(userCredentials.user.uid);
-      console.log(userCredentials.user.uid, username);
-      storeUser(userCredentials.user.uid, username);
+      storeUserName(username);
       setIsLoading(false);
       history.push('/');
     } catch (err) {
       console.log(err);
     }
-  }, [history, storeUser]);
+  }, [history, storeUserName, getUsernameFromDatabase]);
+
+  const formSubmit = useCallback((event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const { email, password } = event.target.elements;
+    if (isValid(email.value, password.value)) {
+      handleSignIn(email.value, password.value);
+      setFormError(false);
+    } else {
+      setFormError(true);
+      setIsLoading(false);
+    }
+  }, [handleSignIn]);
+
 
   return (
     <section className={classes.login}>
@@ -66,26 +59,26 @@ const Login = props => {
         <Row className="py-2">
           <Col md={7} className="my-2 p-2 d-flex justify-content-center align-items-center">
             <Card className={classes.loginCard} body>
-              <Form>
+              <Form onSubmit={formSubmit}>
                 {formError && <Alert variant="danger">Invalid email or password!</Alert>}
                 <Form.Group controlId="formBasicEmail">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
+                    name="email"
                     type="email"
-                    placeholder="Enter email"
-                    onChange={event => setInputEmail(event.target.value)} />
+                    placeholder="Enter email" />
                 </Form.Group>
                 <Form.Group controlId="formBasicPassword">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
+                    name="password"
                     type={hiddenPassword ? "password" : "text"}
-                    placeholder="Password"
-                    onChange={event => setInputPassword(event.target.value)} />
+                    placeholder="Password" />
                 </Form.Group>
                 <Form.Group controlId="formBasicCheckbox">
                   <Form.Check type="checkbox" label="Show Password" onChange={event => setHiddenPassword(!hiddenPassword)} />
                 </Form.Group>
-                <Button className={classes.loginButton} variant="primary" onClick={formSubmit}>
+                <Button className={classes.loginButton} variant="primary" type="submit">
                   Login&nbsp;&nbsp;
                   {isLoading && <Spinner animation="grow" role="status">
                     <span className="sr-only">Loading...</span>
