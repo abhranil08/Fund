@@ -22,22 +22,26 @@ const isValid = (email, passwd) => {
 }
 
 const Signup = props => {
-  const { history, storeUserName, writeUserData } = props;
+  const { history, writeUserData } = props;
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignIn = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithRedirect(provider);
+  }
 
   const handleSignUp = useCallback(async (email, password, userName) => {
     try {
       const userCredentials = await firebase.auth().createUserWithEmailAndPassword(email, password);
       writeUserData(userCredentials.user.uid, userName, email);
-      storeUserName(userName);
       setIsLoading(false);
       history.push('/');
     } catch (err) {
       console.log(err);
     }
-  }, [history, storeUserName, writeUserData])
+  }, [history, writeUserData])
 
   const formSubmit = useCallback((event) => {
     event.preventDefault();
@@ -95,7 +99,9 @@ const Signup = props => {
                 </div>
               </Form>
               <hr />
-              <span className={classes.googleSignIn}><FontAwesomeIcon className="mr-3" icon={faGoogle} size="2x" /> Sign Up with Google</span>
+              <span className={classes.googleSignIn} onClick={handleGoogleSignIn}>
+                <FontAwesomeIcon className="mr-3" icon={faGoogle} size="2x" /> Sign Up with Google
+              </span>
             </Card>
           </Col>
           <Col md={5} className="my-2 p-2 d-flex justify-content-center align-items-center">
