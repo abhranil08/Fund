@@ -21,7 +21,7 @@ const Navigation = props => {
             </>
           ) : (
             <>
-              <span className={classes.NavLink}>Hey {userName}!</span>
+              <Link className={classes.NavLink} to="/dashboard"><span>Dashboard ({userName})</span></Link>
               <span className={classes.NavLink} onClick={handleSignOut}>Sign Out</span>
             </>
           )}
