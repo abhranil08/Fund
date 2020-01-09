@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React, { useState, useCallback, useContext, useEffect } from 'react';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import classes from './App.module.css';
 
 import Navigation from './components/Navigation/Navigation';
@@ -7,21 +7,47 @@ import Footer from './components/Footer/Footer';
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
+import Dashboard from './pages/Dashboard/Dashboard';
 
-import firebase from './firebase/config';
+import firebase, { database } from './firebase/config';
+import { AuthContext } from './context/authContext';
+
+const getUsernameFromDatabase = async (userId) => {
+  const userRef = await database.ref('users/' + userId).once('value');
+  const user = userRef.val();
+  return user.username;
+}
+
+const writeUserData = (userId, userName, email) => {
+  database.ref('users/' + userId).set({
+    username: userName,
+    email: email
+  });
+}
 
 const App = props => {
+  const { currentUser } = useContext(AuthContext);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const [userID, setUserID] = useState(null);
   const [userName, setUserName] = useState('');
 
-  const storeUser = (userID, userName) => {
-    // setUserID(userID);
+  useEffect(() => {
+    if (currentUser) {
+      // console.log('current user', currentUser);
+      getUsernameFromDatabase(currentUser.uid)
+        .then(usr => {
+          setUserName(usr)
+          setIsAuthenticated(true);
+        });
+    } else {
+      console.log('no user signed in');
+    }
+  }, [currentUser]);
+
+  const storeUserName = useCallback((userName) => {
     setUserName(userName);
     setIsAuthenticated(true);
     alert('Signed in successfully!');
-    // console.log(userID);
-  };
+  }, []);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -39,8 +65,16 @@ const App = props => {
       <Navigation isAuthenticated={isAuthenticated} userName={userName} handleSignOut={handleSignOut} />
       <Switch>
         <Route path="/" exact component={Home} />
-        <Route path="/login" render={(props) => <Login {...props} storeUser={storeUser} />} />
-        <Route path="/signup" render={(props) => <Signup {...props} storeUser={storeUser} />} />
+        <Route path="/login"
+          render={(props) => <Login {...props}
+                                storeUserName={storeUserName}
+                                getUsernameFromDatabase={getUsernameFromDatabase} />} />
+        <Route path="/signup"
+          render={(props) => <Signup {...props}
+                                storeUserName={storeUserName}
+                                writeUserData={writeUserData} />} />
+        <Route path="/dashboard"
+          render={(props) => isAuthenticated ? <Dashboard {...props} /> : <Redirect to="/login" />} />
       </Switch>
       <Footer />
     </main>
