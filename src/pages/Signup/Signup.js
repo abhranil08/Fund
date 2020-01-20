@@ -3,6 +3,7 @@ import { Link, withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import firebase from '../../firebase/config';
+import { writeUserData } from '../../firebase/utility';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -22,10 +23,11 @@ const isValid = (email, passwd) => {
 }
 
 const Signup = props => {
-  const { history, writeUserData } = props;
+  const { history } = props;
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleGoogleSignIn = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -39,12 +41,14 @@ const Signup = props => {
       setIsLoading(false);
       history.push('/');
     } catch (err) {
-      console.log(err);
+      setError(err);
+      setIsLoading(false);
     }
-  }, [history, writeUserData])
+  }, [history])
 
   const formSubmit = useCallback((event) => {
     event.preventDefault();
+    setError(null);
     const { username, email, password } = event.target.elements;
     setIsLoading(true);
     if (isValid(email.value, password.value)) {
@@ -64,6 +68,7 @@ const Signup = props => {
             <Card className={classes.signupCard} body>
               <Form onSubmit={formSubmit}>
                 {formError && <Alert variant="danger">Invalid email or password!</Alert>}
+                {error && <Alert variant="danger">{error.message}</Alert>}
                 <Form.Group controlId="formBasicName">
                   <Form.Label>Username</Form.Label>
                   <Form.Control

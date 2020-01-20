@@ -26,6 +26,7 @@ const Login = props => {
   const [hiddenPassword, setHiddenPassword] = useState(true);
   const [formError, setFormError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleGoogleSignIn = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -38,12 +39,14 @@ const Login = props => {
       setIsLoading(false);
       history.push('/');
     } catch (err) {
-      console.log(err);
+      setError(err);
+      setIsLoading(false);
     }
   }, [history]);
 
   const formSubmit = useCallback((event) => {
     event.preventDefault();
+    setError(null);
     setIsLoading(true);
     const { email, password } = event.target.elements;
     if (isValid(email.value, password.value)) {
@@ -63,6 +66,7 @@ const Login = props => {
             <Card className={classes.loginCard} body>
               <Form onSubmit={formSubmit}>
                 {formError && <Alert variant="danger">Invalid email or password!</Alert>}
+                {error && <Alert variant="danger">{error.message}</Alert>}
                 <Form.Group controlId="formBasicEmail">
                   <Form.Label>Email address</Form.Label>
                   <Form.Control
