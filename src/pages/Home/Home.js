@@ -6,12 +6,14 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
+import ImageCarousel from '../../components/Carousel/Carousel';
 
 const Home = props => {
   return (
     <section className={classes.Homepage}>
+      <ImageCarousel />
       <Container>
-        <Row className="py-2">
+        <Row className="mt-2 py-2">
           <Col xs={12} className={classes.heading}>
             <h2>The more you save, the more you safe</h2>
           </Col>
