@@ -9,26 +9,9 @@ import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
 import Dashboard from './pages/Dashboard/Dashboard';
 
-import firebase, { database } from './firebase/config';
+import firebase from './firebase/config';
+import { getUsernameFromDatabase, writeUserData } from './firebase/utility';
 import { AuthContext } from './context/authContext';
-
-const getUsernameFromDatabase = async (userId) => {
-  try {
-    const userRef = await database.ref('users/' + userId).once('value');
-    const user = userRef.val();
-    return user.username;
-  } catch (err) {
-    console.log(err);
-    return '';
-  }
-}
-
-const writeUserData = (userId, userName, email) => {
-  database.ref('users/' + userId).set({
-    username: userName,
-    email: email
-  });
-}
 
 const App = props => {
   const { currentUser } = useContext(AuthContext);
@@ -75,7 +58,7 @@ const App = props => {
         <Route path="/login"
           render={(props) => !isAuthenticated ? <Login {...props} /> : <Redirect to="/" />} />
         <Route path="/signup"
-          render={(props) => !isAuthenticated ? <Signup {...props} writeUserData={writeUserData} /> : <Redirect to="/" />} />
+          render={(props) => !isAuthenticated ? <Signup {...props} /> : <Redirect to="/" />} />
         <Route path="/dashboard"
           render={(props) => isAuthenticated ? <Dashboard {...props} user={currentUser} /> : <Redirect to="/login" />} />
       </Switch>
