@@ -1,0 +1,16 @@
+.FundDisplay {
+  width: 100%;
+  margin: 0;
+  padding: 0 1rem;
+  min-height: 100vh;
+}
+
+.displayHeader {
+  /* background-color: yellow; */
+  padding: 1rem 0;
+}
+
+.returns {
+  /* background-color: orange; */
+  padding: 1rem 0;
+}
