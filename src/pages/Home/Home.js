@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import classes from './Home.module.css';
 
 import Container from 'react-bootstrap/Container';
@@ -19,7 +20,7 @@ const Home = props => {
           </Col>
         </Row>
         <Row className="py-2">
-          <Col md={6} className="d-flex justify-content-center align-items-center">
+          <Col md={12} className="d-flex justify-content-center align-items-center">
             <Card className={classes.landingCard}>
               <Card.Body>
                 <Card.Title className="pt-2"><strong>Mutual Fund Investment</strong></Card.Title>
@@ -28,24 +29,9 @@ const Home = props => {
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </Card.Text>
                 <hr />
-                <Card.Link href="#">
+                <Link to="/search">
                   <Button variant="success">Invest now</Button>
-                </Card.Link>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={6} className="d-flex justify-content-center align-items-center">
-            <Card className={classes.landingCard}>
-              <Card.Body>
-                <Card.Title className="pt-2"><strong>Income Tax Filing</strong></Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">lorem ipsum dolor</Card.Subtitle>
-                <Card.Text>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                </Card.Text>
-                <hr />
-                <Card.Link href="#">
-                  <Button variant="info">Continue</Button>
-                </Card.Link>
+                </Link>
               </Card.Body>
             </Card>
           </Col>
