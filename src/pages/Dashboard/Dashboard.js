@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import classes from './Dashboard.module.css';
 
-import LineChart from '../../components/LineChart/LineChart';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -17,16 +16,6 @@ const Dashboard = props => {
   return (
   <section className={classes.Dashboard}>
     <Container>
-      <Row className="py-3">
-        <Col md={8}>
-          <LineChart />
-        </Col>
-        <Col md={4}>
-          <h4>Example heading</h4>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-        </Col>
-      </Row>
       <h3>Investor database</h3><hr />
       <Row className="py-3">
         <Col sm={12} className="my-2">
