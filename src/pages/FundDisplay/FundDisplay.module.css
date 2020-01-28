@@ -10,6 +10,21 @@
   padding: 1rem 0;
 }
 
+.chartContainer {
+  /* background-color: olive; */
+  width: 60%;
+  padding: 1.5rem .5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media screen and (max-width: 768px) {
+  .chartContainer {
+    width: 75%;
+  }
+}
+
 .returns {
   /* background-color: orange; */
   padding: 1rem 0;

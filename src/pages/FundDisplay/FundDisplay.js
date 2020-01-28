@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import LineChart from '../../components/LineChart/LineChart';
 import classes from './FundDisplay.module.css';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Table from 'react-bootstrap/Table';
+import Button from 'react-bootstrap/Button';
 
 let currentDate, newDate;
 const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -36,6 +38,32 @@ newDate = (+currentDate.getFullYear()) - 2;
 currentDate.setFullYear(newDate);
 const twoYearsBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
 
+const getChartData = async (schemeCode) => {
+  const curDate = new Date();
+  const urls = [];
+  for (let i = 0; i < 12; i++) {
+    let newDate = curDate.getMonth() - 1;
+    curDate.setMonth(newDate);
+    const formattedDate = String(curDate.getDate() + "-" + monthNames[curDate.getMonth()] + "-" + curDate.getFullYear());
+    urls.push(`https://latest-mutual-fund-nav.p.rapidapi.com/fetchHistoricalNAV?SchemeCode=${schemeCode}&SchemeType=All&Date=${formattedDate}`);
+  }
+  urls.reverse();
+  return Promise.all(urls.map(async url => {
+    try {
+      const res = await fetch(url, {
+        "method": "GET",
+        "headers": {
+          "x-rapidapi-host": "latest-mutual-fund-nav.p.rapidapi.com",
+          "x-rapidapi-key": "b52e9f507amshaffdde729615041p170c0fjsn3840f8f00c7e"
+        }
+      });
+      return await res.json();
+    } catch (err) {
+      console.log(err);
+    }
+  }))
+}
+
 const FundDisplay = props => {
   const { params: { mfSchemeCode } } = props.match;
   const [data, setData] = useState([]);
@@ -46,6 +74,7 @@ const FundDisplay = props => {
   const [sixMonthsReturn, setSixMonthsReturn] = useState(null);
   const [oneYearReturn, setOneYearReturn] = useState(null);
   const [twoYearReturn, setTwoYearReturn] = useState(null);
+  const [chartData, setChartData] = useState([]);
 
   const urls = useMemo(() => [
     `https://latest-mutual-fund-nav.p.rapidapi.com/fetchHistoricalNAV?SchemeCode=${mfSchemeCode}&SchemeType=All&Date=${yesterday}`,
@@ -163,6 +192,18 @@ const FundDisplay = props => {
             } else {
               setTwoYearReturn(<small>Data not available</small>)
             }
+
+            return getChartData(mfSchemeCode);
+          })
+          .then(chartData => {
+            const cleanData = [];
+            for (let d of chartData) {
+              if (d[0]) {
+                cleanData.push(d[0]);
+              }
+            }
+            console.log(cleanData);
+            setChartData(cleanData);
           })
       })
       .catch(err => {
@@ -184,6 +225,12 @@ const FundDisplay = props => {
                   Type: {data['Scheme Type']}<br />
                   Family: {data['Mutual Fund Family']}
                 </p>
+                <Button variant="success">Invest now</Button>
+              </div>
+              <div className={classes.chartContainer}>
+                {(chartData.length > 0) ? <LineChart 
+                                            datasetLabel={data['Scheme Name']}
+                                            dataset={chartData} /> : <Spinner animation="grow" variant="primary"></Spinner>}
               </div>
               <div className={classes.returns}>
                 <h2>Returns <small>(NAV as on {data['Date']})</small></h2>
