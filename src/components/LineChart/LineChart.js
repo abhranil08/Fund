@@ -2,11 +2,16 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 
 const LineChart = props => {
+  const { dataset } = props;
+
+  const labels = dataset.map(d => d['Date']);
+  const chartData = dataset.map(d => d['Net Asset Value']);
+
   const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    labels: labels,
     datasets: [
       {
-        label: 'Example dataset',
+        label: props.datasetLabel,
         fill: false,
         lineTension: 0.1,
         backgroundColor: 'rgba(75,192,192,0.4)',
@@ -24,13 +29,13 @@ const LineChart = props => {
         pointHoverBorderWidth: 2,
         pointRadius: 1,
         pointHitRadius: 10,
-        data: [65, 59, 80, 81, 56, 55, 40, 45, 47, 50, 52, 49]
+        data: chartData
       }
     ]
   };
 
   return (
-    <Line data={data} legend={{ position: 'right' }}/>
+    <Line data={data} legend={{ position: 'bottom' }}/>
   );
 }
 
