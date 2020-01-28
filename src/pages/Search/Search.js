@@ -98,7 +98,7 @@ const Search = props => {
                 </tr>
               </thead>
               <tbody>
-                  {isLoading ? <tr><td><Spinner animation="grow" variant="dark" /></td></tr> : (
+                  {isLoading ? <tr><td><Spinner animation="grow" variant="primary" /></td></tr> : (
                     data.length > 0 ? (
                       data.map((d, index) => {
                         return (
