@@ -1,6 +1,7 @@
 .Dashboard {
   margin: 0;
   padding: 0;
+  min-height: 70vh;
 }
 
 .tableEntry {
