@@ -25,6 +25,12 @@
   }
 }
 
+@media screen and (max-width: 576px) {
+  .chartContainer {
+    width: 95%;
+  }
+}
+
 .returns {
   /* background-color: orange; */
   padding: 1rem 0;
