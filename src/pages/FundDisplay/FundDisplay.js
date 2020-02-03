@@ -1,42 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import LineChart from '../../components/LineChart/LineChart';
+import { monthNames, yesterday, oneWeekBefore, oneMonthBefore, oneYearBefore, sixMonthsBefore, twoYearsBefore } from './utll';
+import { AuthContext } from '../../context/authContext';
+import PayWithRazorpay from '../../components/PayWithRazorpay/PayWithRazorpay';
 import classes from './FundDisplay.module.css';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
-
-let currentDate, newDate;
-const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-currentDate = new Date();
-const yesterday = String((+currentDate.getDate() - 2) + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
-
-currentDate = new Date();
-newDate = currentDate.getDate() - 7;
-currentDate.setDate(newDate);
-const oneWeekBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
-
-currentDate = new Date();
-newDate = currentDate.getMonth() - 1;
-currentDate.setMonth(newDate);
-const oneMonthBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
-
-currentDate = new Date();
-newDate = currentDate.getMonth() - 6;
-currentDate.setMonth(newDate);
-const sixMonthsBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
-
-currentDate = new Date()
-newDate = (+currentDate.getFullYear()) - 1;
-currentDate.setFullYear(newDate);
-const oneYearBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
-
-currentDate = new Date();
-newDate = (+currentDate.getFullYear()) - 2;
-currentDate.setFullYear(newDate);
-const twoYearsBefore = String(currentDate.getDate() + "-" + monthNames[currentDate.getMonth()] + "-" + currentDate.getFullYear());
 
 const getChartData = async (schemeCode) => {
   const curDate = new Date();
@@ -66,6 +39,7 @@ const getChartData = async (schemeCode) => {
 
 const FundDisplay = props => {
   const { params: { mfSchemeCode } } = props.match;
+  const { currentUser } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [oneDayDifference, setOneDayDifference] = useState(null);
@@ -202,7 +176,6 @@ const FundDisplay = props => {
                 cleanData.push(d[0]);
               }
             }
-            console.log(cleanData);
             setChartData(cleanData);
           })
       })
@@ -225,7 +198,11 @@ const FundDisplay = props => {
                   Type: {data['Scheme Type']}<br />
                   Family: {data['Mutual Fund Family']}
                 </p>
-                <Button variant="success">Invest now</Button>
+                {currentUser ? <PayWithRazorpay
+                  unitPrice={data['Net Asset Value']}
+                  schemeCode={data['Scheme Code']}
+                  currentUser={currentUser}
+                  /> : <Link to="/login"><Button variant="primary">Login to Invest</Button></Link>}
               </div>
               <div className={classes.chartContainer}>
                 {(chartData.length > 0) ? <LineChart 
