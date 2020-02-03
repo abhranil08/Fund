@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import { database } from '../../firebase/config';
 import { getUserFromDatabase } from '../../firebase/utility';
 import Row from 'react-bootstrap/Row';
@@ -8,7 +9,7 @@ import Button from 'react-bootstrap/Button';
 import classes from './PayWithRazorpay.module.css';
 
 const PayWithRazorpay = props => {
-  const { unitPrice, schemeCode, currentUser } = props;
+  const { unitPrice, schemeCode, currentUser, history } = props;
   const [userDetails, setUserDetails] = useState(null);
   const [amount, setAmount] = useState(0);
 
@@ -66,8 +67,9 @@ const PayWithRazorpay = props => {
             userId: currentUser.uid
           })
           .then(paymentId => {
+            const currentDate = new Date();
             return database.ref('OrderDesc').push({
-              date: new Date().toLocaleString(),
+              date: currentDate.toDateString() + " " + currentDate.toTimeString(),
               paymentId: paymentId.key,
               price_per_unit: unitPrice,
               units: amount
@@ -106,6 +108,7 @@ const PayWithRazorpay = props => {
               }
             }
             database.ref('users/' + currentUser.uid).update(updatedData);
+            history.push('/payment-success');
           })
           .catch(err => console.log(err));
         },
@@ -134,11 +137,11 @@ const PayWithRazorpay = props => {
           <Form.Control type='number' placeholder="0" onChange={e => setAmount(e.target.value)}></Form.Control>
         </Col>
         <Col md={4}>
-          <Button variant='primary' onClick={openPayModal}>Buy {amount} units</Button>
+          <Button variant='primary' onClick={openPayModal} disabled={amount === 0 ? true : false}>Buy {amount} units</Button>
         </Col>
       </Row>
     </div>
   );
 }
 
-export default PayWithRazorpay;
+export default withRouter(PayWithRazorpay);
