@@ -11,6 +11,7 @@ import Signup from './pages/Signup/Signup';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Search from './pages/Search/Search';
 import FundDisplay from './pages/FundDisplay/FundDisplay';
+import PaymentSuccess from './pages/PaymentSuccess/PaymentSuccess';
 
 import firebase from './firebase/config';
 import { getUsernameFromDatabase } from './firebase/utility';
@@ -56,6 +57,7 @@ const App = props => {
         <Route path="/signup" exact component={Signup} />
         <Route path="/search" exact component={Search} />
         <Route path="/search/:mfSchemeCode" exact component={FundDisplay} />
+        <Route path="/payment-success" exact component={PaymentSuccess} />
         <PrivateRoute path="/dashboard" component={Dashboard} />
       </Switch>
       <Footer />
