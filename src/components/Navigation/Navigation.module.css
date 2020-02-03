@@ -1,11 +1,11 @@
 .Navbar {
-  padding: .5rem 2rem;
+  padding: .5rem 1rem;
   text-align: center;
 }
 
 .NavBrand {
   font-size: 1.5rem;
-  padding: .5rem 1rem;
+  padding: .5rem 0rem .5rem .5rem;
   color: black;
 }
 
