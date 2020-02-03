@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { database } from '../../firebase/config';
 import { AuthContext } from '../../context/authContext';
 import PieChart from '../../components/PieChart/PieChart';
-// import PayWithRazorpay from '../../components/PayWithRazorpay/PayWithRazorpay';
+import AddUnits from '../../components/AddUnits/AddUnits';
 import classes from './Dashboard.module.css';
 
 import Container from 'react-bootstrap/Container';
@@ -11,12 +11,13 @@ import Col from 'react-bootstrap/Col';
 import Table from 'react-bootstrap/Table';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import Button from 'react-bootstrap/Button';
+import Spinner from 'react-bootstrap/Spinner';
 
 const Dashboard = props => {
   const { currentUser } = useContext(AuthContext);
   const [currentNAV, setCurrentNAV] = useState([]);
   const [userOrders, setUserOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [dashControlsKey, setDashControlsKey] = useState('your-mutual-funds');
   const [investorsKey, setInvestorsKey] = useState('overall-gain-or-loss');
 
@@ -49,6 +50,7 @@ const Dashboard = props => {
             .catch(err => console.log(err));
         })).then(data => {
           setCurrentNAV(data.map((d, i) => d[0]));
+          setIsLoading(false);
         })
       })
   }, [currentUser.uid])
@@ -86,13 +88,13 @@ const Dashboard = props => {
                   </tr>
                 </thead>
                 <tbody>
-                  {userOrders.map((order, index) => {
+                  {isLoading ? <tr><td><Spinner animation="grow" variant="primary" /></td></tr> : userOrders.map((order, index) => {
                     return (
                       <tr key={index}>
                         <td>{order.id}</td>
                         <td>{order.unitsLeft}</td>
                         <td>{order.costValue}</td>
-                        <td>{(currentNAV.length > 0) ? currentNAV[index]['Net Asset Value'] : null}</td>
+                        <td>{currentNAV[index]['Net Asset Value']}</td>
                       </tr>
                     )
                   })}
@@ -108,13 +110,16 @@ const Dashboard = props => {
                   </tr>
                 </thead>
                 <tbody>
-                  {userOrders.map((order, index) => {
+                  {isLoading ? <tr><td><Spinner animation="grow" variant="primary" /></td></tr> : userOrders.map((order, index) => {
                     return (
                       <tr key={index}>
                         <td>{order.id}</td>
                         <td>{order.unitsLeft}</td>
                         <td>
-                          <Button variant="primary">Add More</Button>
+                          <AddUnits
+                            currentUser={currentUser}
+                            orderId={order.id}
+                            unitPrice={currentNAV[index]['Net Asset Value']} />
                         </td>
                       </tr>
                     )
