@@ -3,6 +3,12 @@ const bodyParser = require('body-parser');
 const Razorpay = require('razorpay');
 
 const app = express();
+app.use((req, response, next) => {
+	response.setHeader("Access-Control-Allow-Origin", "*");
+	response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+	response.setHeader("Access-Control-Allow-Headers", "*");
+	next();
+});
 app.use(bodyParser.json({ extended: false }));
 
 const instance = new Razorpay({
