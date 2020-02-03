@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { database } from '../../firebase/config';
+import { AuthContext } from '../../context/authContext';
+import PieChart from '../../components/PieChart/PieChart';
+// import PayWithRazorpay from '../../components/PayWithRazorpay/PayWithRazorpay';
 import classes from './Dashboard.module.css';
 
 import Container from 'react-bootstrap/Container';
@@ -7,11 +11,47 @@ import Col from 'react-bootstrap/Col';
 import Table from 'react-bootstrap/Table';
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
-import PayWithRazorpay from '../../components/PayWithRazorpay/PayWithRazorpay';
+import Button from 'react-bootstrap/Button';
 
 const Dashboard = props => {
+  const { currentUser } = useContext(AuthContext);
+  const [currentNAV, setCurrentNAV] = useState([]);
+  const [userOrders, setUserOrders] = useState([]);
   const [dashControlsKey, setDashControlsKey] = useState('your-mutual-funds');
   const [investorsKey, setInvestorsKey] = useState('overall-gain-or-loss');
+
+  useEffect(() => {
+    let urls = [];
+    database.ref('orders').once('value')
+      .then(res => {
+        const fetchedOrders = res.val();
+        const orders = [];
+        for (let orderID in fetchedOrders) {
+          if (fetchedOrders[orderID].userID === currentUser.uid) {
+            orders.push({
+              id: orderID,
+              ...fetchedOrders[orderID]
+            })
+          }
+        }
+        setUserOrders(orders);
+        for (let order in orders) {
+          urls.push(`https://latest-mutual-fund-nav.p.rapidapi.com/fetchLatestNAV?SchemeType=All&SchemeCode=${orders[order].schemeCode}`);
+        }
+        Promise.all(urls.map(url => {
+          return fetch(url, {
+            "method": "GET",
+            "headers": {
+              "x-rapidapi-host": "latest-mutual-fund-nav.p.rapidapi.com",
+              "x-rapidapi-key": "b52e9f507amshaffdde729615041p170c0fjsn3840f8f00c7e"
+            }
+          }).then(res => res.json())
+            .catch(err => console.log(err));
+        })).then(data => {
+          setCurrentNAV(data.map((d, i) => d[0]));
+        })
+      })
+  }, [currentUser.uid])
 
   return (
   <section className={classes.Dashboard}>
@@ -20,20 +60,22 @@ const Dashboard = props => {
         <h3>Investor database</h3><hr />
         <Col sm={12} className="my-2">
           <Tabs id="investor-tabs" activeKey={investorsKey} onSelect={k => setInvestorsKey(k)}>
-            <Tab eventKey="overall-gain-or-loss" title="Overall Gain or Loss">
-              overall gain or loss
+            <Tab className="py-3" eventKey="overall-gain-or-loss" title="Overall Gain or Loss">
+              Overall gain or loss
+              <PieChart />
             </Tab>
-            <Tab eventKey="todays-gain-or-loss" title="Today's Gain or Loss">
+            <Tab className="py-3" eventKey="todays-gain-or-loss" title="Today's Gain or Loss">
               Today's gain or loss
+              <PieChart />
             </Tab>
-            <Tab eventKey="total-aum" title="Total AUM">
+            <Tab className="py-3" eventKey="total-aum" title="Total AUM">
               Total AUM
             </Tab>
           </Tabs>
         </Col>
         <Col sm={12} className="my-2">
           <Tabs id="dashboard-controls-tab" activeKey={dashControlsKey} onSelect={k => setDashControlsKey(k)}>
-            <Tab eventKey="your-mutual-funds" title="Your Mutual Funds">
+            <Tab className="py-3" eventKey="your-mutual-funds" title="Your Mutual Funds">
               <Table striped hover className="mt-2">
                 <thead>
                   <tr>
@@ -43,20 +85,50 @@ const Dashboard = props => {
                     <th>Current Value</th>
                   </tr>
                 </thead>
+                <tbody>
+                  {userOrders.map((order, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{order.id}</td>
+                        <td>{order.unitsLeft}</td>
+                        <td>{order.costValue}</td>
+                        <td>{(currentNAV.length > 0) ? currentNAV[index]['Net Asset Value'] : null}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
               </Table>
             </Tab>
-            <Tab eventKey="add" title="Add">
-              Add More
-              <br />
-              <PayWithRazorpay />
+            <Tab className="py-3" eventKey="add" title="Add">
+              <Table striped hover className="mt-2">
+                <thead>
+                  <tr>
+                    <th>Folio no.</th>
+                    <th>Units Left</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userOrders.map((order, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{order.id}</td>
+                        <td>{order.unitsLeft}</td>
+                        <td>
+                          <Button variant="primary">Add More</Button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </Table>
             </Tab>
-            <Tab eventKey="sell" title="Sell">
+            <Tab className="py-3" eventKey="sell" title="Sell">
               Sell
             </Tab>
-            <Tab eventKey="switch" title="Switch">
+            <Tab className="py-3" eventKey="switch" title="Switch">
               Switch
             </Tab>
-            <Tab eventKey="graph" title="Graph">
+            <Tab className="py-3" eventKey="graph" title="Graph">
               Graph
             </Tab>
           </Tabs>
